@@ -4,12 +4,14 @@ import os
 import pytesseract
 import re
 from collections import Counter
-import requests  # Importa a biblioteca requests para envio de requisições HTTP
+import requests
 
 
 os.environ['TESSDATA_PREFIX'] = r'C:\Program Files\Tesseract-OCR\tessdata'
-API_URL = "https://example.com/api/dns"  # URL da api de gerenciamento
+API_URL = "http://localhost:5001/payments"
 
+amount = 20
+documentNumber = "12345678901"
 
 app = Flask(__name__)
 
@@ -89,14 +91,19 @@ def is_significantly_different(new_text, old_text):
     return difference_count >= len(new_text) / 2
 
 def send_plate_to_api(plate_text):
+    global amount, documentNumber
     # Dados que serão enviados na requisição
-    data = {'plate': plate_text}
+    data = {
+        'plate': plate_text,
+        'amount': amount,
+        'documentNumber': documentNumber
+    }
     try:
         response = requests.post(API_URL, json=data)
-        if response.status_code == 200:
-            print(f"Placa {plate_text} enviada com sucesso!")
+        if response.status_code == 201:
+            print(f"Pagamento para a placa {plate_text} efetuado com sucesso!")
         else:
-            print(f"Falha ao enviar a placa {plate_text}. Código de status: {response.status_code}")
+            print(f"Falha ao tentar realizar pagamento. Placa: {plate_text}. Código de status: {response.status_code}")
     except requests.exceptions.RequestException as e:
         print(f"Erro ao conectar com a API: {e}")
 
