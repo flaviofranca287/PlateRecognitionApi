@@ -108,10 +108,6 @@ def send_plate_to_api(plate_text):
         print(f"Erro ao conectar com a API: {e}")
 
 @app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/video_feed')
 def video_feed():
     return Response(capture_plates(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
