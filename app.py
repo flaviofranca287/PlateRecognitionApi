@@ -35,9 +35,9 @@ def capture_plates():
             for (x, y, w, h) in plates:
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
                 plate_img = frame[y:y+h, x:x+w]
-                text = perform_ocr_with_voting(plate_img)
+                text = recognize_text(plate_img)
                 
-                if text and (last_text is None or is_significantly_different(text, last_text)):
+                if text and is_valid_reading(text) and (last_text is None or is_significantly_different(text, last_text)):
                     cv2.imwrite("PlacaDetectada.png", plate_img)
                     print(f"Placa detectada: {text}")
                     
@@ -66,19 +66,6 @@ def recognize_text(plate_img):
     text = pytesseract.image_to_string(preprocessed, config=custom_config)
     text = re.sub(r'[^A-Za-z0-9]', '', text)  # Remove caracteres indesejados
     return text.strip()
-
-def perform_ocr_with_voting(plate_img):
-    readings = []
-    
-    for _ in range(3):  # Realiza 10 leituras
-        text = recognize_text(plate_img)
-        if is_valid_reading(text):
-            readings.append(text)
-    
-    if readings:
-        most_common_text, _ = Counter(readings).most_common(1)[0]  # Obtém o texto mais frequente
-        return most_common_text
-    return None
 
 def is_valid_reading(text):
     # Define os critérios de validação para formatos ABC1234 e ABC1C34
